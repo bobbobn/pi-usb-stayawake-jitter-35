@@ -183,6 +183,24 @@ class MouseJitter:
             logging.error(f"Failed to send mouse report: {e}")
             return False
     
+    def move_circle(self, radius=10, steps=20):
+        """Move mouse in a circle to indicate the service is working"""
+        logging.info("Moving mouse in circle to indicate service is active...")
+        import math
+        
+        for i in range(steps):
+            angle = 2 * math.pi * i / steps
+            x = int(radius * math.cos(angle))
+            y = int(radius * math.sin(angle))
+            
+            if self.send_mouse_report(x_delta=x, y_delta=y):
+                logging.debug(f"Circle movement step {i+1}/{steps}: ({x}, {y})")
+                time.sleep(0.1)
+        
+        # Return to center with final movement
+        self.send_mouse_report(x_delta=0, y_delta=0)
+        logging.info("Circle movement complete - service is working!")
+
     def jitter_mouse(self):
         """Move mouse by 1 pixel in a random direction, then back"""
         # Random direction (1 or -1 for x and y)
@@ -213,6 +231,9 @@ class MouseJitter:
             return
         
         logging.info("Mouse jitter service started successfully")
+        
+        # Move in circle at startup to show it's working
+        self.move_circle()
         
         while self.running:
             try:
